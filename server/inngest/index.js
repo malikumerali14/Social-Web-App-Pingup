@@ -11,7 +11,7 @@ const syncUserCreation = inngest.createFunction(
     },
     async ({ event }) => {
         const { id, email_addresses, first_name, last_name, image_url } = event.data;
-        let username = email_addresses[0].split('@')[0];
+        let username = email_addresses.split('@')[0];
 
         const user = await User.findOne({ username });
 

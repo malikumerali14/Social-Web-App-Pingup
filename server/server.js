@@ -6,13 +6,13 @@ import { inngest, functions } from './inngest/index.js';
 import dotenv from 'dotenv';
 dotenv.config()
 
-const app = express()
+const app = express();
 await connectDB();
 
 const port = 3000
 
 app.use(express.json());
-app.use(cors())
+app.use(cors());
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
         
