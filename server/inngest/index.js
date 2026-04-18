@@ -1,5 +1,6 @@
 import { Inngest } from "inngest";
 import User from '../models/User.js'
+import connectDB from "../configs/db.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "pingup-app" });
@@ -10,6 +11,7 @@ const syncUserCreation = inngest.createFunction(
         triggers: { event: "clerk/user.created" },
     },
     async ({ event }) => {
+        await connectDB();
         const { id, email_addresses, first_name, last_name, image_url } = event.data;
         let username = email_addresses[0]?.email_address.split('@')[0];
 
