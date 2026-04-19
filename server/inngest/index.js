@@ -6,8 +6,8 @@ import mongoose from "mongoose";
 
 // Reusable connection helper
 const connectDB = async () => {
-  if (mongoose.connection.readyState >= 1) return;
-  await mongoose.connect(process.env.MONGODB_URI);
+    if (mongoose.connection.readyState >= 1) return;
+    await mongoose.connect(process.env.MONGODB_URI);
 };
 
 // Create a client to send and receive events
@@ -25,23 +25,30 @@ const syncUserCreation = inngest.createFunction(
             console.log("Waiting for connection to stabilize...");
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
+        try {
+            const { id, email_addresses, first_name, last_name, image_url } = event.data;
+            let username = email_addresses[0]?.email_address.split('@')[0];
 
-        const { id, email_addresses, first_name, last_name, image_url } = event.data;
-        let username = email_addresses[0]?.email_address.split('@')[0];
+            // const user = await User.findOne({ username });
 
-        // const user = await User.findOne({ username });
+            username = username + Math.floor(Math.random() * 1000);
 
-        username = username + Math.floor(Math.random() * 1000);
+            const userData = {
+                _id: id,
+                email: email_addresses[0]?.email_address,
+                full_name: first_name + " " + last_name,
+                profile_picture: image_url,
+                username
+            }
 
-        const userData = {
-            _id: id,
-            email: email_addresses[0]?.email_address,
-            full_name: first_name + " " + last_name,
-            profile_picture: image_url,
-            username
+            await User.create(userData);
+
+            
+        } catch (error) {
+            console.error("User creation failed:", err);
+            throw err;
         }
 
-        await User.create(userData);
 
     }
 );
