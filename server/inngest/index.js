@@ -4,12 +4,6 @@ import connectDB from "../configs/db.js";
 import mongoose from "mongoose";
 
 
-// Reusable connection helper
-const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) return;
-    await mongoose.connect(process.env.MONGODB_URI);
-};
-
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "pingup-app" });
 
@@ -21,10 +15,6 @@ const syncUserCreation = inngest.createFunction(
     async ({ event }) => {
         await connectDB();
 
-        if (mongoose.connection.readyState !== 1) {
-            console.log("Waiting for connection to stabilize...");
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
         try {
             const { id, email_addresses, first_name, last_name, image_url } = event.data;
             let username = email_addresses[0]?.email_address.split('@')[0];
@@ -43,7 +33,7 @@ const syncUserCreation = inngest.createFunction(
 
             await User.create(userData);
 
-            
+
         } catch (error) {
             console.error("User creation failed:", err);
             throw err;
