@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 import User from '../models/User.js'
 import connectDB from "../configs/db.js";
 import mongoose from "mongoose";
+import Story from "../models/Story.js";
 
 
 // Create a client to send and receive events
@@ -64,7 +65,7 @@ const syncUserUpdation = inngest.createFunction(
     }
 );
 
-
+    
 //Function to delete user data from database 
 const syncUserDeletion = inngest.createFunction(
     {
@@ -79,9 +80,28 @@ const syncUserDeletion = inngest.createFunction(
     }
 );
 
+// Function to delete story after 24 Hours
+const deleteStory = inngest.createFunction(
+    {
+        id: "delete-story",
+        triggers: { event: "app/story.delete" },
+    },
+    async ({ event, step, runId }) => {
+        const { storyId } = event.data;
+        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await step.sleepUntil('wait-for-24-hours', in24Hours);
+        await step.run('delete-story', async () => {
+            await Story.findByIdAndDelete(storyId);
+            return { message: "Story Deleted" };
+        })
+
+    }
+);
+
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
     syncUserCreation,
     syncUserUpdation,
-    syncUserDeletion
+    syncUserDeletion,
+    deleteStory
 ];
