@@ -1,5 +1,5 @@
-import cloudinary from "../configs/cloudinary";
-import Message from "../models/Messages";
+import cloudinary from "../configs/cloudinary.js";
+import Message from "../models/Messages.js";
 
 // Create an empty object to store Server Side Event Connection
 const connections = {};
