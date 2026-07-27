@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import api from '../../api/axios';
 
 const initialState = {
     connections: [],
@@ -10,6 +11,7 @@ const initialState = {
 export const fetchConnections = createAsyncThunk(
     'users/fetchConnections',
     async (token) => {
+        if (!token) return rejectWithValue("No token found");
         const { data } = await api.get('/api/user/connections', {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -37,7 +39,5 @@ export const connectionSlice = createSlice({
     },
 })
 
-// Action creators are generated for each case reducer function
-export const { increment, decrement, incrementByAmount } = connectionSlice.actions
 
 export default connectionSlice.reducer

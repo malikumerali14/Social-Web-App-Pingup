@@ -121,7 +121,7 @@ export const followUser = async (req, res) => {
         toUser.followers.push(userId);
         await toUser.save();
 
-        return res.json({ success: true, message: "Now you are following this user" });
+        return res.json({ success: true, message: "You are following this user" });
 
 
 
@@ -164,6 +164,7 @@ export const unfollowUser = async (req, res) => {
 // Send Connection Request
 export const sendConnectionRequest = async (req, res) => {
     try {
+        console.log("➡️ ENTERED SEND CONNECTION REQUEST CONTROLLER");
         const { userId } = req.auth();
         const { id } = req.body;
 
@@ -192,7 +193,7 @@ export const sendConnectionRequest = async (req, res) => {
             return res.json({ success: true, message: "Connection request sent successfully" })
 
         } else if (connection) {
-            return res.json({ success: false, message: "You are already following this user" })
+            return res.json({ success: false, message: "Connection request already sent" })
         }
 
         return res.json({ success: false, message: "Connection request pending" });

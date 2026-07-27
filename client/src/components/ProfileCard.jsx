@@ -2,18 +2,64 @@ import React, { useState } from 'react'
 import { MapPin, MessageCircle, Plus, UserPlus } from 'lucide-react'
 import { dummyUserData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import api from '../api/axios'
+import { useAuth } from '@clerk/clerk-react'
+import toast from 'react-hot-toast'
+import { fetchUser } from '../features/user/userSlice'
 
 const ProfileCard = ({ user }) => {
     const currentUser = useSelector((state) => state.user.value)
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const { getToken } = useAuth();
 
     const handleFollow = async () => {
+        try {
+            const token = await getToken();
+            const { data } = await api.post('/api/user/follow', { id: user._id }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
 
+            if (data.success) {
+                toast.success(data.message);
+                dispatch(fetchUser(token));
+
+            } else {
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
     const handleConnectionRequest = async () => {
+        if (currentUser.connections.includes(user._id)) {
+            return navigate('/messages/' + user._id)
+        }
 
+        try {
+            const token = await getToken();
+            const { data } = await api.post('/api/user/connect', { id: user._id }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            if (data.success) {
+                toast.success(data.message);
+
+            } else {
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
     return (
@@ -44,17 +90,20 @@ const ProfileCard = ({ user }) => {
 
                     <div className='flex text-white w-full mt-4'>
                         <button
+                            onClick={handleFollow}
                             disabled={currentUser.followers.includes(user._id)}
                             className='w-full justify-center mx-2 px-4 py-2 rounded-md flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 cursor-pointer'>
                             <UserPlus className='w-4 h-4 ' />
-                            {currentUser.followers.includes(user._id) ? "Following" : "Follow"}
+                            {currentUser.following.includes(user._id) ? "Following" : "Follow"}
                         </button>
 
                         {/* Connection Request Button / Message Button  */}
-                        <button className='flex items-center justify-center w-14 text-slate-500 border group rounded-md cursor-pointer active:scale-95 transition'>
+                        <button
+                            onClick={handleConnectionRequest}
+                            className='flex items-center justify-center w-14 text-slate-500 border group rounded-md cursor-pointer active:scale-95 transition'>
                             {
-                                currentUser.followers.includes(user._id) ?
-                                    <MessageCircle className='w-5 h-55hover:scale-105 transition-all' />
+                                currentUser.connections.includes(user._id) ?
+                                    <MessageCircle className='w-5 h-55 hover:scale-105 transition-all' />
                                     :
                                     <Plus className='w-5 h-5 hover:scale-105 transition-all' />
                             }

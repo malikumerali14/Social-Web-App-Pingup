@@ -2,16 +2,19 @@ import { Search } from 'lucide-react'
 import React from 'react'
 import { useState } from 'react'
 import ProfileCard from '../components/ProfileCard'
-import { dummyConnectionsData } from '../assets/assets'
 import Loading from '../components/Loading'
 import api from '../api/axios'
 import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { fetchUser } from '../features/user/userSlice'
 
 const Discover = () => {
     const [input, setInput] = useState()
-    const [users, setUsers] = useState(dummyConnectionsData)
+    const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(false)
+    const dispatch = useDispatch();
 
     const { getToken } = useAuth();
 
@@ -38,6 +41,16 @@ const Discover = () => {
             setLoading(false);
         }
     }
+
+
+    useEffect(() => {
+        getToken().then((token) => {
+            dispatch(fetchUser(token));
+        })
+
+
+    }, [getToken])
+
 
     return (
         <>

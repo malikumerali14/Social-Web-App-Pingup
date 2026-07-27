@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { MessageCircle, UserCheck, UserPlus, UserRoundPen, Users } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '@clerk/clerk-react'
-import { fetchConnections } from '../features/connections/connectionsSlice'
+import { fetchConnections } from '../features/connections/connectionsSlice.js'
 import { useEffect } from 'react'
+import api from '../api/axios.js'
+import toast from 'react-hot-toast'
 // import {
 //     dummyFollowersData as followers,
 //     dummyConnectionsData as connections,
@@ -19,7 +21,10 @@ const Connections = () => {
 
     const { getToken } = useAuth();
 
-    const { followers, following, connections, pendingConnections } = useSelector((state) => state.connections);
+    const { followers = [],
+        following = [],
+        connections = [],
+        pendingConnections = [] } = useSelector((state) => state.connections);
     const dataArray = [
         { label: "Followers", value: followers, icon: Users },
         { label: "Following", value: following, icon: UserCheck },
