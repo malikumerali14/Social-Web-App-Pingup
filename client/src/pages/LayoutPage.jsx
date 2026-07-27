@@ -13,7 +13,7 @@ const LayoutPage = () => {
 
   return user ? (
     <>
-      <div className='flex min-h-screen w-full relative'>
+      <div className='flex h-screen w-full relative'>
         <div className=''>
           <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
