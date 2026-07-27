@@ -3,17 +3,47 @@ import React, { useState } from 'react'
 import moment from 'moment'
 import { dummyUserData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useAuth } from '@clerk/clerk-react'
+import toast from 'react-hot-toast'
+import api from '../api/axios'
 
 const PostCard = ({ post }) => {
 
     const postWithHashtags = post.content.replace(/(#\w+)/g, "<span class='text-indigo-600'>$1</span>")
     const [likes, setLikes] = useState(post.likes_count)
-    const currentUser = dummyUserData
-    const navigate = useNavigate()
+    const currentUser = useSelector((state) => state.user.value)
+    const navigate = useNavigate();
 
+    const { getToken } = useAuth();
 
-    const handleLike = () => {
-        
+    const handleLike = async () => {
+        try {
+            const { data } = await api.post('/api/post/like', { postId: post._id }, {
+                headers: {
+                    Authorization: `Bearer ${await getToken()}`
+                }
+            })
+
+            if (data.success) {
+                toast.success(data.message);
+                setLikes(prev => {
+                    const currentLikes = Array.isArray(prev) ? prev : [];
+                    if (currentLikes?.includes(currentUser._id)) {
+                        return currentLikes.filter(id => id !== currentUser._id)
+                    } else {
+                        return [...currentLikes, currentUser._id]
+                    }
+                })
+
+            } else {
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message)
+        }
+
     }
 
     return (
@@ -50,8 +80,8 @@ const PostCard = ({ post }) => {
                 <div className='flex items-center gap-1'>
                     <Heart
                         onClick={handleLike}
-                        className={`w-4 h-4 cursor-pointer ${likes.includes(currentUser._id) && "text-red-500 fill-red-500"}`} />
-                    <span>{likes.length}</span>
+                        className={`w-4 h-4 cursor-pointer ${likes?.includes?.(currentUser._id) && "text-red-500 fill-red-500"}`} />
+                    <span>{likes?.length}</span>
                 </div>
                 <div className='flex items-center gap-1'>
                     <MessageCircle className='w-4 h-4 cursor-pointer' />

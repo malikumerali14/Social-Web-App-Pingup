@@ -1,10 +1,17 @@
 import React, { useState } from 'react'
 import { dummyUserData } from '../assets/assets'
 import { Pencil } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import toast from 'react-hot-toast';
+import Loading from './Loading';
+import { updateUser } from '../features/user/userSlice';
 
 const ProfileModal = ({ setShowEdit }) => {
 
-    const user = dummyUserData;
+    const { getToken } = useAuth();
+    const dispatch = useDispatch();
+    const user = useSelector((state) => state.user.value);
     const [editForm, setEditForm] = useState({
         user_name: user.username,
         bio: user.bio,
@@ -17,6 +24,31 @@ const ProfileModal = ({ setShowEdit }) => {
     const handleSaveProfile = async (e) => {
         e.preventDefault()
 
+        try {
+            // 1. Create a FormData instance for file/text uploads
+            const userData = new FormData();
+            userData.append('full_name', editForm.full_name);
+            userData.append('username', editForm.user_name);
+            userData.append('bio', editForm.bio);
+            userData.append('location', editForm.location);
+
+            // 2. Only append image files if the user selected new ones
+            if (editForm.profile_picture) {
+                userData.append('profile', editForm.profile_picture); // Key matches multer field name "profile"
+            }
+            if (editForm.cover_photo) {
+                userData.append('cover', editForm.cover_photo); // Key matches multer field name "cover"
+            }
+
+            const token = await getToken();
+            dispatch(updateUser({ userData, token }));
+
+            setShowEdit(false);
+            
+
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
 
@@ -28,7 +60,8 @@ const ProfileModal = ({ setShowEdit }) => {
 
                     <form
                         className='space-y-6 text-slate-800'
-                        onSubmit={handleSaveProfile}>
+                        onSubmit={(e) => toast.promise(handleSaveProfile(e),
+                            { loading: "Saving Data..." })}>
                         <div className='flex flex-col items-start gap-3'>
                             <label className='block text-sm font-medium' htmlFor='profile_picture'>
                                 Profile Picture
@@ -138,7 +171,7 @@ const ProfileModal = ({ setShowEdit }) => {
                 </div>
             </div>
 
-        </div>
+        </div >
     )
 }
 

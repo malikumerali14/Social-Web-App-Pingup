@@ -4,10 +4,13 @@ import { Menu, X } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import { dummyUserData } from '../assets/assets'
 import Loading from '../components/Loading'
+import { useSelector } from 'react-redux'
 
 const LayoutPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const user = dummyUserData
+  const user = useSelector((state) => state.user.value)
+
+
   return user ? (
     <>
       <div className='flex min-h-screen w-full relative'>

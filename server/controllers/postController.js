@@ -10,14 +10,14 @@ export const addPost = async (req, res) => {
         const { content, post_type } = req.body;
         const images = req.files;
 
-        let images_url = [];
+        let image_urls = [];
 
         if (images.length) {
-            images_url = await Promise.all(
+            image_urls = await Promise.all(
                 images.map(async (image) => {
                     const response = await cloudinary.uploader.upload(image.path);
                     const url = response.url;
- 
+
                     return url;
                 })
             )
@@ -26,7 +26,7 @@ export const addPost = async (req, res) => {
         await Post.create({
             user: userId,
             content,
-            images_url,
+            image_urls,
             post_type
         })
         return res.json({ success: true, message: "Post Created Successfully" });
@@ -53,7 +53,7 @@ export const getFeedPosts = async (req, res) => {
         const userIds = [userId, ...user.following, ...user.connections];
         const posts = await Post.find({ user: { $in: userIds } }).populate('user').sort({ createdAt: -1 });
 
-        res.json({ success: true, posts });
+        return res.json({ success: true, posts });
 
 
     }
@@ -73,6 +73,9 @@ export const likePost = async (req, res) => {
 
 
         const post = await Post.findById(postId);
+        console.log("Current User ID:", userId);
+        console.log("Post Likes Array:", post.likes_count);
+
         if (post.likes_count.includes(userId)) {
             post.likes_count = post.likes_count.filter((user) => user !== userId);
             await post.save();
@@ -80,8 +83,10 @@ export const likePost = async (req, res) => {
             return res.json({ success: true, message: "Post unliked" });
 
         } else {
-            post.likes_count.push(userId);
+            post?.likes_count?.push(userId);
             await post.save();
+
+
 
             return res.json({ success: true, message: "Post Liked" });
         }

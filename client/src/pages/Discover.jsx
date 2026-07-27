@@ -4,21 +4,38 @@ import { useState } from 'react'
 import ProfileCard from '../components/ProfileCard'
 import { dummyConnectionsData } from '../assets/assets'
 import Loading from '../components/Loading'
+import api from '../api/axios'
+import { useAuth } from '@clerk/clerk-react'
+import toast from 'react-hot-toast'
 
 const Discover = () => {
     const [input, setInput] = useState()
     const [users, setUsers] = useState(dummyConnectionsData)
     const [loading, setLoading] = useState(false)
 
-    const handleSearch = (e) => { 
-        if(e.key == 'Enter'){
-            setUsers([])
-            setLoading(true)
-            setTimeout(() => {
-                setUsers(dummyConnectionsData)
-                setLoading(false)
+    const { getToken } = useAuth();
 
-            }, 1000);
+
+    const handleSearch = async (e) => {
+        if (e.key == 'Enter') {
+            try {
+                setUsers([])
+                setLoading(true)
+
+                const { data } = await api.post('/api/user/discover', { input }, {
+                    headers: {
+                        Authorization: `Bearer ${await getToken()}`
+                    }
+                })
+
+                data.success ? setUsers(data.users) : toast.error(data.message);
+                setLoading(false);
+                setInput('');
+
+            } catch (error) {
+                toast.error(error.message)
+            }
+            setLoading(false);
         }
     }
 

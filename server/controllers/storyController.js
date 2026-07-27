@@ -24,7 +24,7 @@ export const addStory = async (req, res) => {
             content,
             media_type,
             background_color,
-
+            media_url
         })
 
         // Schedule Story Deletion after 24 Hours using inngest

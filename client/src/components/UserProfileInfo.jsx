@@ -12,7 +12,7 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
                 <div className='flex flex-col md:flex-row '>
 
                     <div className='w-32 h-32 border-white '>
-                        <img src={user.profile_picture} className='absolute w-32 -top-13 rounded-full border border-white p-1 bg-white' />
+                        <img src={user.profile_picture} className='absolute w-32 h-32 -top-12 rounded-full border border-white p-1 bg-white' />
                     </div>
 
                     <div className='w-full px-8 py-4'>
